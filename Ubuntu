@@ -1,0 +1,43 @@
+sudo apt update
+sudo apt install openjdk-17-jdk -y
+java -version
+sudo wget https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+sudo tar -xvzf latest-unix.tar.gz
+sudo mv /opt/nexus-3* /opt/nexus
+sudo adduser nexus
+sudo chown -R nexus:nexus nexus
+sudo sh nexus-3*/bin/nexus start
+sudo vim /opt/nexus/bin/nexus.rc
+
+          # Add or uncomment this line;
+          # (run_as_user="nexus")
+          # Create a service file;
+          # sudo "vim /etc/systemd/system/nexus.service"
+          # Paste this; 
+          # "[Unit]
+          # Description=Nexus Repository Manager
+          # After=network.target"
+
+          # "[Service]
+          #  Type=forking
+          #  LimitNOFILE=65536
+          #  ExecStart=/opt/nexus/bin/nexus start
+          #  ExecStop=/opt/nexus/bin/nexus stop
+          #  User=nexus
+          #  Restart=on-abort"
+
+          # "[Install]
+          #  WantedBy=multi-user.target"
+
+sudo systemctl daemon-reload
+sudo systemctl enable nexus
+sudo systemctl start nexus
+sudo systemctl status nexus
+
+          # http://<Public_IP>:8081
+          # Default credentials:
+          
+          # User: admin
+          # Password: stored in "cat /opt/sonatype-work/nexus3/admin.password"
+
+
