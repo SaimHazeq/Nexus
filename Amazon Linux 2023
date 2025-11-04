@@ -1,0 +1,43 @@
+sudo dnf update -y
+sudo dnf install -y java-17-amazon-corretto-devel wget
+sudo mkdir -p /opt/nexus
+sudo mkdir -p /tmp/nexus/
+cd /tmp/nexus/
+NEXUSURL="https://download.sonatype.com/nexus/3/nexus-unix-x86-64-3.78.0-14.tar.gz" # Replace with the actual latest URL 
+wget $NEXUSURL
+tar xvzf nexus-unix-x86-64-3.78.0-14.tar.gz # Replace with the downloaded filename
+sudo mv nexus-3.78.0-14 /opt/nexus/ # Replace with the extracted folder name
+sudo mv sonatype-work /opt/nexus/
+sudo adduser nexus
+sudo chown -R nexus:nexus /opt/nexus/
+sudo vim /opt/nexus/nexus-3.78.0-14/bin/nexus.rc # Replace with your version
+          # Uncomment or add the line:
+          #  "run_as_user="nexus"
+sudo vim /etc/systemd/system/nexus.service
+          # Add the following content:
+
+          #  "[Unit]
+          #   Description=nexus service
+          #   After=network.target"
+          
+          #  "[Service]
+          #   Type=forking
+          #   LimitNOFILE=65536
+          #   ExecStart=/opt/nexus/nexus-3.78.0-14/bin/nexus start
+          #   ExecStop=/opt/nexus/nexus-3.78.0-14/bin/nexus stop
+          #   User=nexus
+          #   Group=nexus
+          #   Restart=on-failure"
+          
+          #  "[Install]
+          #   WantedBy=multi-user.target"
+
+  # Remember to replace nexus-3.78.0-14 with your Nexus version.
+
+sudo systemctl daemon-reload
+sudo systemctl enable nexus.service
+sudo systemctl start nexus.service
+
+          # http://<Public_IP>:8081
+          # User: admin
+          # Password: stored in "cat /opt/sonatype-work/nexus3/admin.password"
